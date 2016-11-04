@@ -1,0 +1,1 @@
+A [Swagger](http://swagger.io/) communications module for [FIDO 2.0 Server](https://github.com/apowers313/fido2-server)
