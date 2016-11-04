@@ -1,0 +1,135 @@
+# FIDO 2.0 Server API
+swagger: '2.0'
+info:
+  title: WebAuthn / FIDO 2.0 API
+  description: An secure authentication API
+  version: "0.7.0"
+# the domain of the service
+host: webauthn.org:61904
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /auth/fido/v1/
+produces:
+  - application/json
+paths:
+  /register-challenge:
+    post:
+      summary: Registration Challenge
+      description: |
+        Retreive an attestation challenge to be signed by the authenticator when making a credential.
+      parameters:
+        - name: userId
+          in: body
+          description: Name of the account to fetch a challenge for
+          required: true
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/RegistrationChallengeRequest'
+      responses:
+        200:
+          description: Attestation challenge response
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/RegistrationChallengeResponse'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /register:
+    post:
+      summary: Register User
+      description: |
+        Register a user with a signed attestation challenge
+      parameters:
+        - name: userId
+          in: body
+          description: Name of the account to register
+          required: true
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/RegistrationRequest'
+      responses:
+        200:
+          description: Attestation challenge response
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/RegistrationResponse'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Header:
+    type: object
+    properties:
+      op:
+        type: string # should be enum
+        description: The operation being performed by this message
+      version:
+        type: object
+        properties:
+          major:
+            type: number
+          minor:
+            type: number
+      appID:
+        type: string
+      serverData:
+        type: string
+  RegistrationChallengeRequest:
+    type: object
+    properties:
+      header:
+        type: object
+        items:
+           $ref: '#/definitions/Header'
+      userId:
+        type: string
+        description: Name of the account to fetch a challenge for
+  RegistrationChallengeResponse:
+    type: object
+    properties:
+      header:
+        type: object
+        items:
+           $ref: '#/definitions/Header'
+      challenge:
+        type: string
+        description: The challenge to be signed by the authenticator
+  RegistrationRequest:
+    type: object
+    properties:
+      header:
+        type: object
+        items:
+           $ref: '#/definitions/Header'
+      credential:
+        type: object
+        properties:
+          type:
+            type: string
+          id:
+            type: string
+  RegistrationResponse:
+    type: object
+    properties:
+      header:
+        type: object
+        items:
+           $ref: '#/definitions/Header'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
