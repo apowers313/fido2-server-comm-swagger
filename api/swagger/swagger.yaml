@@ -1,0 +1,97 @@
+swagger: "2.0"
+info:
+  title: FIDO 2
+  version: "0.7.0"
+  description: A secure authentication API for FIDO 2.0 / W3C WebAuthn
+# XXX TODO: should be parameterized
+host: localhost:61904
+# basePath prefixes all resource paths
+basePath: /auth/fido/v1
+#
+schemes:
+  # XXX TODO only TLS/https, per spec
+  - http
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /register-challenge:
+    # defines the file for the controller
+    x-swagger-router-controller: register
+    post:
+      summary: Registration Challenge
+      description: |
+        Retreive an attestation challenge to be signed by the authenticator when making a credential.
+      # defines the method name for the controller
+      operationId: register
+      parameters:
+        - name: userId
+          in: body
+          description: Name of the account to fetch a challenge for
+          required: true
+          schema:
+            $ref: '#/definitions/RegistrationChallengeRequest'
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/RegistrationChallengeResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  Header:
+    type: object
+    properties:
+      op:
+        description: The operation to be performed upon receipt of this message
+        type: string
+        enum: ["Reg", "Auth"]
+      version:
+        type: object
+        properties:
+          major:
+            type: number
+          minor:
+            type: number
+      appID:
+        type: string
+      serverData:
+        type: string
+  RegistrationChallengeRequest:
+    type: object
+    properties:
+      header:
+        $ref: '#/definitions/Header'
+      userId:
+        type: string
+        description: Name of the account to fetch a challenge for
+  RegistrationChallengeResponse:
+    type: object
+    properties:
+      header:
+        $ref: '#/definitions/Header'
+      challenge:
+        type: string
+        description: The challenge to be signed by the authenticator
+      userId:
+        type: string
+        description: The user that the challenge is for
+  ErrorResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+      stack:
+        type: string

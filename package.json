@@ -1,0 +1,36 @@
+{
+  "name": "fido2-server-comm-swagger",
+  "version": "0.7.0",
+  "description": "A Swagger communication module for FIDO 2.0 Server",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "supertest": "^2.0.1"
+  },
+  "scripts": {
+    "test": "mocha --recursive test/api"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apowers313/fido2-server-comm-swagger.git"
+  },
+  "keywords": [
+    "swagger",
+    "fido2",
+    "fido",
+    "server",
+    "webauthn",
+    "auth",
+    "authn"
+  ],
+  "author": "Adam Powers <apowers@ato.ms>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/apowers313/fido2-server-comm-swagger/issues"
+  },
+  "homepage": "https://github.com/apowers313/fido2-server-comm-swagger#readme"
+}
