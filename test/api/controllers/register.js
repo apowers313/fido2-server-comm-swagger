@@ -11,7 +11,7 @@ describe("controllers", function() {
       it("should return challenge object", function(done) {
 
         request(server)
-          .post("/auth/fido/v1/register-challenge")
+          .post("/api/auth/fido/v1/register-challenge")
           .expect(200)
           .set("Accept", "application/json")
           .expect("Content-Type", /json/)
