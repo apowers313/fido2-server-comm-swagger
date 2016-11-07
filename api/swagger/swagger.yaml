@@ -6,7 +6,7 @@ info:
 # XXX TODO: should be parameterized
 host: localhost:61904
 # basePath prefixes all resource paths
-basePath: /auth/fido/v1
+basePath: /api/authn/fido/v1
 #
 schemes:
   # XXX TODO only TLS/https, per spec
@@ -19,15 +19,15 @@ paths:
     # defines the file for the controller
     x-swagger-router-controller: register
     post:
-      summary: Registration Challenge
+      summary: Registration Challenge Request
       description: |
         Retreive an attestation challenge to be signed by the authenticator when making a credential.
       # defines the method name for the controller
       operationId: register
       parameters:
-        - name: userId
+        - name: msg
           in: body
-          description: Name of the account to fetch a challenge for
+          description: The registration challenge request message
           required: true
           schema:
             $ref: '#/definitions/RegistrationChallengeRequest'
@@ -58,8 +58,12 @@ definitions:
         properties:
           major:
             type: number
+            maximum: 2
+            minimum: 1
           minor:
             type: number
+            maximum: 1
+            minimum: 0
       appID:
         type: string
       serverData:
