@@ -48,10 +48,12 @@ function swaggerUiInit(swaggerUrl) {
         exphbs({
             defaultLayout: "main"
         }));
+    var distdir = path.join(__dirname, "swagger-ui/dist");
+    app.set("views", distdir);
     app.set("view engine", "handlebars");
     // TODO: port should be a configuration option
     app.set("port", 8000);
-    app.use(express.static(path.join(__dirname, "swagger-ui/dist")));
+    app.use(express.static(distdir));
     app.get("/", function(req, res) {
         res.render("index.handlebars", {layout: false, swaggerSpecUrl: swaggerUrl}); // this is the important part
     });
