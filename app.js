@@ -3,8 +3,6 @@
 var SwaggerRestify = require("swagger-restify-mw");
 var restify = require("restify");
 var app = restify.createServer();
-var path = require("path");
-var swaggerJSDoc = require("swagger-jsdoc");
 
 module.exports = app;
 
@@ -17,6 +15,8 @@ SwaggerRestify.create(config, function(err, swaggerRestify) {
         throw err;
     }
 
+    // restify's default CORS settings are Accept *
+    // TODO: this should be configurable
     app.use(restify.CORS());
 
     swaggerRestify.register(app);
@@ -39,23 +39,31 @@ SwaggerRestify.create(config, function(err, swaggerRestify) {
     swaggerUiInit(apiBase + "/swagger");
 });
 
+// TODO: might be able to replace this with swagger-ui from swagger-tools:
+// https://github.com/apigee-127/swagger-tools/blob/master/middleware/swagger-ui.js
+// UI object is available at swaggerRestify.runner.swaggerTools.swaggerUi
 function swaggerUiInit(swaggerUrl) {
     var express = require("express");
     var path = require("path");
-    var app = express();
+    var eApp = express();
     var exphbs = require("express-handlebars");
-    app.engine("handlebars",
+    eApp.engine("handlebars",
         exphbs({
             defaultLayout: "main"
         }));
     var distdir = path.join(__dirname, "swagger-ui/dist");
-    app.set("views", distdir);
-    app.set("view engine", "handlebars");
+    eApp.set("views", distdir);
+    eApp.set("view engine", "handlebars");
     // TODO: port should be a configuration option
-    app.set("port", 8000);
-    app.use(express.static(distdir));
-    app.get("/", function(req, res) {
-        res.render("index.handlebars", {layout: false, swaggerSpecUrl: swaggerUrl}); // this is the important part
+    eApp.set("port", 8000);
+    eApp.use(express.static(distdir));
+    eApp.get("/", function(req, res) {
+        res.render("index.handlebars", {
+            layout: false,
+            swaggerSpecUrl: swaggerUrl,
+            docExpansion: "list"
+        }); // this is the important part
     });
-    app.listen(app.get("port"));
+    eApp.listen(eApp.get("port"));
+    console.log("Swagger UI running:", swaggerUrl);
 }
