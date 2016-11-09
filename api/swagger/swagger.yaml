@@ -150,28 +150,9 @@ paths:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
 definitions:
-  Header:
-    type: object
-    properties:
-      op:
-        description: The operation to be performed upon receipt of this message
-        type: string
-        enum: ["Reg", "Auth"]
-      version:
-        type: object
-        properties:
-          major:
-            type: number
-            maximum: 2
-            minimum: 2
-          minor:
-            type: number
-            maximum: 0
-            minimum: 0
-      appID:
-        type: string
-      serverData:
-        type: string
+###
+# Registration Challenge
+###
   RegistrationChallengeRequest:
     type: object
     properties:
@@ -187,17 +168,51 @@ definitions:
         $ref: '#/definitions/Header'
       challenge:
         type: string
-        format: byte
+        format: byte # TODO: format: byte; or pattern: base64url
         description: The challenge to be signed by the authenticator
+      account:
+        type: object
+        properties:
+          rpDisplayName:
+            type: string
+            description: The friendly name of the Relying Party, such as "Acme Corporation", "Widgets Inc" or "Awesome Site"
+          displayName:
+            type: string
+            description: The friendly name associated with the user account by the Relying Party, such as "John P. Smith"
+          id:
+            type: string
+            description: An identifier for the account, specified by the Relying Party. This is not meant to be displayed to the user. It is used by the Relying Party to control the number of credentials - an authenticator will never contain more than one credential for a given Relying Party under the same id.
+          name:
+            type: string
+            description: A detailed name for the account, such as "john.p.smith@example.com"
+          imageURL:
+            type: string
+            description: A URL that resolves to the user’s account image. This may be a URL that can be used to retrieve an image containing the user’s current avatar, or a data URI that contains the image data.
       userId:
         type: string
         description: The user that the challenge is for
-      # extensions
-      # timeout
-      # rpId
-      # authenticator excludeList
-      # algorithmIdentifier list
-      # id = userId
+      algorithmIdentifierList:
+        type: array
+        items:
+          type: string
+      options:
+        type: object
+        properties:
+          extensions:
+            type: array
+            items:
+              type: object
+          timeout:
+            type: integer
+          rpId:
+            type: string
+          excludeList:
+            type: array
+            items:
+              $ref: '#/definitions/ScopedCredentialDescription'
+###
+# Registration Request
+###
   RegistrationRequest:
     type: object
     properties:
@@ -206,14 +221,29 @@ definitions:
       userId:
         type: string
         description: Name of the account to fetch a challenge
-      # credential
-      # publicKey
-      # attestation
+      credentialId:
+        $ref: '#/definitions/CredentialID'
+      publicKey:
+        type: object
+      attestation:
+        type: object
+        properties:
+          format:
+            type: string
+          clientData:
+            $ref: '#/definitions/ClientData'
+          authenticatorData:
+            $ref: '#/definitions/AuthenticatorData'
+          attestation:
+            type: object
   RegistrationResponse:
     type: object
     properties:
       status:
         $ref: '#/definitions/SuccessResponse'
+###
+# Authentication Challenge
+###
   AuthnChallengeRequest:
     type: object
     properties:
@@ -233,10 +263,24 @@ definitions:
       userId:
         type: string
         description: The user that the challenge is for
-      # rpId
-      # timeoutSeconds
-      # allowList
-      # extensions list
+      options:
+        type: object
+        properties:
+          extensions:
+            type: array
+            items:
+              type: object
+          timeout:
+            type: integer
+          rpId:
+            type: string
+          allowList:
+            type: array
+            items:
+              $ref: '#/definitions/ScopedCredentialDescription'
+###
+# Authentication Request
+###
   AuthnRequest:
     type: object
     properties:
@@ -245,15 +289,81 @@ definitions:
       userId:
         type: string
         description: Name of the account to fetch a challenge
-      # credential
-      # clientData
-      # authenticatorData
-      # signature
+      assertion:
+        $ref: '#/definitions/WebAuthnAssertion'
   AuthnResponse:
     type: object
     properties:
       status:
         $ref: '#/definitions/SuccessResponse'
+###
+# Data types referenced above
+###
+  Header:
+    type: object
+    properties:
+      op:
+        description: The operation to be performed upon receipt of this message
+        type: string
+        enum:
+          - Reg
+          - Authn
+      version:
+        type: object
+        properties:
+          major:
+            type: number
+            enum:
+              - 2
+            # maximum: 2
+            # minimum: 2
+          minor:
+            type: number
+            enum:
+              - 0
+            # maximum: 0
+            # minimum: 0
+  ScopedCredentialDescription:
+    type: object
+    properties:
+      type:
+        type: string
+      id:
+        type: string
+        pattern: "[a-zA-Z0-9_-]*" # base64url
+      transport:
+        type: array
+        items:
+          type: string
+          enum:
+            - usb
+            - nfc
+            - ble
+  WebAuthnAssertion:
+    type: object
+    properties:
+      credentialId:
+        $ref: '#/definitions/CredentialID'
+      clientData:
+        $ref: '#/definitions/ClientData'
+      authenticatorData:
+        $ref: '#/definitions/AuthenticatorData'
+      signature:
+        type: string
+        pattern: "[a-zA-Z0-9_-]*" # base64url
+  CredentialID:
+    type: string
+    description: Credential ID
+    pattern: "[a-zA-Z0-9_-]*" # base64url
+  ClientData:
+    type: string
+    pattern: "[a-zA-Z0-9_-]*" # base64url
+  AuthenticatorData:
+    type: string
+    pattern: "[a-zA-Z0-9_-]*" # base64url
+###
+# Success and failure messages
+###
   ErrorResponse:
     type: object
     properties:
@@ -274,4 +384,5 @@ definitions:
         format: int32
       message:
         type: string
-        enum: [ "Success" ]
+        enum:
+          - Success
