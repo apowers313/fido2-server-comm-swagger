@@ -168,7 +168,7 @@ definitions:
         $ref: '#/definitions/Header'
       challenge:
         type: string
-        format: byte # TODO: format: byte; or pattern: base64url
+        pattern: "[a-zA-Z0-9_-]*" # base64url
         description: The challenge to be signed by the authenticator
       account:
         type: object
@@ -221,8 +221,18 @@ definitions:
       userId:
         type: string
         description: Name of the account to fetch a challenge
-      credentialId:
-        $ref: '#/definitions/CredentialID'
+      scopedCredential:
+        $ref: '#/definitions/ScopedCredentialInfo'
+  RegistrationResponse:
+    type: object
+    properties:
+      status:
+        $ref: '#/definitions/SuccessResponse'
+  ScopedCredentialInfo:
+    type: object
+    properties:
+      credential:
+        $ref: '#/definitions/Credential'
       publicKey:
         type: object
       attestation:
@@ -236,11 +246,6 @@ definitions:
             $ref: '#/definitions/AuthenticatorData'
           attestation:
             type: object
-  RegistrationResponse:
-    type: object
-    properties:
-      status:
-        $ref: '#/definitions/SuccessResponse'
 ###
 # Authentication Challenge
 ###
@@ -342,8 +347,8 @@ definitions:
   WebAuthnAssertion:
     type: object
     properties:
-      credentialId:
-        $ref: '#/definitions/CredentialID'
+      credential:
+        $ref: '#/definitions/Credential'
       clientData:
         $ref: '#/definitions/ClientData'
       authenticatorData:
@@ -351,8 +356,16 @@ definitions:
       signature:
         type: string
         pattern: "[a-zA-Z0-9_-]*" # base64url
-  CredentialID:
-    type: string
+  Credential:
+    type: object
+    properties:
+        type:
+          type: string
+          enum:
+            - ScopedCred
+        id:
+          type: string
+          pattern: "[a-zA-Z0-9_-]*" # base64url
     description: Credential ID
     pattern: "[a-zA-Z0-9_-]*" # base64url
   ClientData:
